@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% load cart %}
+{% load custom_filter %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-6">
+            <img src="{{ product.image.url }}" alt="{{ product.name }}" class="img-fluid">
+        </div>
+        <div class="col-md-6">
+            <h2>{{ product.name }}</h2>
+            <p><strong>Giá:</strong> {{ product.price|currency }}</p>
+            <p><strong>Loại:</strong> {{ product.category }}</p>
+            <p><strong>Thông tin:</strong> {{ product.description }}</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+

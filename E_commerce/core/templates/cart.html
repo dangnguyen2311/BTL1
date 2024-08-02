@@ -1,0 +1,146 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% load cart %}
+{% load custom_filter %}
+<div class="container">
+   <div class="border rounded p-4 m-4">
+        <p class="display-4 pl-4 ml-4 btn btn-success rounded-pill">Your Cart</p>
+        <hr>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Stt</th>
+                    <th>Ảnh</th>
+                    <th>Sản Phẩm</th>
+                    <th>Giá</th>
+                    <th>S.lg</th>
+                    <th>Thành tiền</th>
+                    {% comment %} <th>    </th>
+                    <th>    </th>
+                    <th>    </th>
+                    <th>    </th>
+                    <th>    </th>
+                    <th>    </th> {% endcomment %}
+                    <th>  Chỉnh sửa </th>
+                    
+                    {% comment %} <th></th>
+                    <th>    </th>
+                    <th>    </th>
+                    <th>    </th>
+                    <th>    </th>
+                    <th>    </th> {% endcomment %}
+                </tr>
+            </thead>
+            <tbody>
+                
+                {% for product in products %}
+                <tr>
+                    <td>{{forloop.counter}}</td>
+                    <td><img style="height: 80px;" class="rounded-circle" src="{{product.image.url}}" alt=""></td>
+                    <td>{{product.name}}</td>
+                    <td>{{product.price|currency}}</td>
+                    <td>{{product|cart_quantity:request.session.cart}}</td>
+                    <td>{{product|price_total:request.session.cart|currency}}</td>
+                    {% comment %} <td>
+                      <!-- Thêm nút "Xoá" với data-product-id chứa id sản phẩm -->
+                      <button class="btn btn-danger" data-product-id="{{product.id}}">Xoá</button>
+                  </td> {% endcomment %}
+                    {% comment %} <td>
+                      <form method="post" action="{% url 'delete_product' product.id %}">
+                          {% csrf_token %}
+                          <button type="submit" class="btn btn-danger">Delete</button>
+                      </form>
+                    </td> {% endcomment %}
+                    {% comment %} <td>  </td>
+                    <td>  </td>
+                    <td>  </td>
+                    <td>  </td>
+                    <td>  </td> {% endcomment %}
+                    
+                    <td>
+                      <form method="post" action="{% url 'down_cart' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="product_id" value="{{ product.id }}">
+                        <button type="submit" class="btn btn-warning">-</button>
+                      </form>
+                    </td>
+                    <td>{{product|cart_quantity:request.session.cart}}</td>
+                    <td>
+                      <form method="post" action="{% url 'up_cart' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="product_id" value="{{ product.id }}">
+                        <button type="submit" class="btn btn-success">+</button>
+                      </form>
+                    </td>
+                    {% comment %} <td>  </td>
+                    <td>  </td>
+                    <td>  </td>
+                    <td>  </td>
+                    <td>  </td> {% endcomment %}
+                    {% comment %} <th>    </th>
+                    <th>    </th>
+                    <th>    </th> {% endcomment %}
+                </tr>
+
+                {% endfor %}
+               
+            </tbody>
+            
+            <tfoot>
+                <tr>
+                    <th colspan="4"></th>
+                    <th class="" colspan="">Tổng</th>
+                    <th>{{products|total_cart_price:request.session.cart|currency}}</th>
+                </tr>
+            </tfoot>
+        </table>
+        <hr>
+        <div class="m-3 p-3">
+            <a href="#" data-toggle="modal" data-target="#exampleModal" class="btn btn-outline-success border rounded  col-lg-3 float-right">Thanh toán</a>
+        </div>
+        
+   </div>
+</div>
+
+<!-- modal -->
+
+  <!-- Modal -->
+  <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">
+              Đơn hàng của bạn
+          </h5>
+          <hr>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="m-2 p-3">
+            <form action="/check-out" method="POST">
+                {% csrf_token %}
+                <div class="form-group">
+                  <label for="">Địa chỉ</label>
+                  <input type="text" name="address" id="" class="form-control" placeholder="" aria-describedby="helpId">
+                  
+                </div>
+                <div class="form-group">
+                    <label for="">SĐT</label>
+                    <input type="text" name="phone" id="" class="form-control" placeholder="" aria-describedby="helpId">
+                  </div>
+
+                  <input type="submit" class="btn float-right btn-outline-success col-lg-6" value="Thanh toán">
+            </form>
+          </div>
+        </div>
+        
+      </div>
+    </div>
+  </div>
+
+
+{% endblock %}
+

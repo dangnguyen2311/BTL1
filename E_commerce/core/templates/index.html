@@ -1,0 +1,187 @@
+{% extends 'base.html' %}
+{% block content %}
+{% load cart %}
+{% load custom_filter %}
+
+<!-- Style form tìm kiếm -->
+<style>
+  .search-form {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+
+  /* Style the search input field */
+  .search-input {
+    padding: 10px;
+    border: 2px solid #007bff;
+    border-radius: 20px;
+    font-size: 16px;
+    outline: none;
+    width: 300px;
+    transition: border-color 0.3s;
+  }
+
+  /* Style the search button */
+  .search-button {
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 20px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+
+  /* Add hover effect to the button */
+  .search-button:hover {
+    background-color: #0056b3;
+  }
+
+  .form-inline {
+    padding-top: 5px;
+    padding-bottom: 10px;
+  }
+
+  .custom-background {
+    background-color: #B0D4B8;
+  }
+
+  .custom-background2 {
+    background-color: #4EB09B;
+  }
+
+  .custom-rounded {
+    border-radius: 10px; 
+  }
+
+  .custom-fontsize {
+    font-size: 25px; 
+  }
+
+  .custom-fontsize2 {
+    font-size: 21px; 
+  }
+</style>
+
+
+
+<!-- body -->
+<div class="container-fluid mt-3">
+  <div class="row">
+
+
+    <!-- filter -->
+
+    <div class="col-lg-3 mx-auto">
+        <div class="col-lg-9 mx-auto text-center">
+          <form method="get" action="" class="form-inline">
+            <div class="form-group">
+              <input type="text" class="form-control" id="search_query" name="search_query" placeholder="Tên sản phẩm" />
+            </div>
+            <button type="submit" class="btn btn-primary">Search</button>
+          </form>
+        </div>
+      <!-- Hết form tìm kiếm -->
+
+      <div class="list-group">
+
+        <a href="/" class="list-group-item list-group-item-action btn btn-outline-success custom-background2 custom-fontsize custom-rounded">All Products</a>
+
+        {% for category in categories %}
+        <a href="/?category={{category.id}}"
+          class="list-group-item list-group-item-action btn btn-outline-success custom-background custom-fontsize2 custom-rounded">{{category.name}}</a>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- all products -->
+    <div id='products' class="col-lg-9 mx-auto">
+      <div class="row mx-auto">
+        {% for product in products %}
+        <div class="card mx-auto mb-3" id={{product.id}} style="width: 18rem;">
+          {% comment %} <img class="card-img-top" src="{{product.image.url}}" alt="Card image cap"> {% endcomment %}
+          <img class="card-img-top" src="{{ product.image.url }}" alt="Card image cap" data-toggle="modal"
+            data-target="#productModal{{ product.id }}">
+
+          <div class="card-body">
+            <p class="card-title">{{product.name}}</p>
+            <p class="card-text"><b>{{product.price|currency}}</b></p>
+            <!-- {{product | is_in_cart:request.session.cart }} -->
+          </div>
+
+
+          <!-- Modal cho từng sản phẩm -->
+          <div class="modal fade" id="productModal{{ product.id }}" tabindex="-1" role="dialog"
+            aria-labelledby="productModalLabel{{ product.id }}">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="productModalLabel{{ product.id }}"
+                    style="border: 1px solid #ccc; background-color: #AFEEEE; border-radius: 10px; padding: 10px;display: block; margin: 5 auto;">
+                    {{ product.name }}</h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body">
+                  <!-- Hiển thị ảnh sản phẩm tại đây -->
+                  <img src="{{ product.image.url }}" alt="Product Image"
+                    style="max-width: 100%; display: block; margin: 0 auto;">
+                  <!-- Hiển thị thông tin sản phẩm tại đây -->
+                  <p>Giá: {{ product.price|currency }}</p>
+                  <!-- Thêm thông tin sản phẩm khác nếu cần -->
+                </div>
+                <div class="modal-body">
+                  <!-- Hiển thị thông tin sản phẩm tại đây -->
+                  <p>{{ product.description }}</p>
+                  <!-- Thêm thông tin sản phẩm khác nếu cần -->
+                </div>
+              </div>
+            </div>
+          </div>
+
+
+          <div class="card-footer p-0 no-gutters">
+            {% if product|is_in_cart:request.session.cart %}
+            <div class="row no-gutters">
+              <form action="/#{{product.id}}" class="col-2 " method="post">
+                {% csrf_token %}
+                <input hidden type="text" name='product' value='{{product.id}}'>
+                <input hidden type="text" name='remove' value='True'>
+                <input type="submit" value=" - " class="btn btn-block btn-success border-right">
+              </form>
+              <div class="text-center col btn btn-success">{{product|cart_quantity:request.session.cart}} trong giỏ</div>
+              <form action="/#{{product.id}}" class="col-2 " method="post">
+                {% csrf_token %}
+                <input hidden type="text" name='product' value='{{product.id}}'>
+                <input type="submit" value=" + " class="btn btn-block btn-success border-left">
+              </form>
+            </div>
+            {% else %}
+            <form action="/#{{product.id}}" method="POST" class="btn-block">
+              {% csrf_token %}
+              <input hidden type="text" name='product' value='{{product.id}}'>
+              <input type="submit" class="float-right btn btn-success form-control" value="Thêm vào giỏ hàng">
+            </form>
+            {% endif %}
+            {% comment %} <form action="/#{{product.id}}" method="GET" class="btn-block">
+              {% csrf_token %}
+              <input hidden type="text" name='product' value='{{product.id}}'>
+              <input type="submit" class="float-right btn btn-warning form-control" value="More Detail">
+            </form> {% endcomment %}
+            <form action="{% url 'detail_product' product.id %}" method="GET" class="btn-block">
+              <input type="submit" class="float-right btn btn-warning form-control" value="Thông tin SP">
+            </form>
+
+          </div>
+
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
